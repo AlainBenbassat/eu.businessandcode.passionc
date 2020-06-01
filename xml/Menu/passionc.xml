@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<menu>
+  <item>
+    <path>civicrm/nettoyage</path>
+    <page_callback>CRM_Passionc_Form_Clean</page_callback>
+    <title>Clean</title>
+    <access_arguments>access CiviCRM</access_arguments>
+  </item>
+</menu>
