@@ -120,6 +120,7 @@ class CRM_Passionc_Helper {
     $params = [
       'contact_id' => $org['id'],
       'country_id' => 1076,
+      'location_type_id' => 3,
     ];
     if ($street_address) {
       $params['street_address'] = $street_address;
