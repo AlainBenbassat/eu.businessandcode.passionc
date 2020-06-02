@@ -216,4 +216,46 @@ class CRM_Passionc_Helper {
     // create/update the home address
     civicrm_api3('Address', 'create', $params);
   }
+
+  public static function correctName() {
+    $sql = "
+      update
+        civicrm_contact
+      set
+        first_name = CONCAT(UCASE(LEFT(first_name, 1)), lower(SUBSTRING(first_name, 2)))
+      where
+        contact_type  = 'Individual'
+      and
+        (first_name = BINARY lower(first_name) or first_name = BINARY upper(first_name))
+      and
+        is_deleted = 0
+    ";
+    CRM_Core_DAO::executeQuery($sql);
+
+    $sql = "
+      update
+        civicrm_contact
+      set
+        last_name = CONCAT(UCASE(LEFT(last_name, 1)), lower(SUBSTRING(last_name, 2)))
+      where
+        contact_type  = 'Individual'
+      and
+        (last_name = BINARY lower(last_name) or last_name = BINARY upper(last_name))
+      and
+        is_deleted = 0
+    ";
+    CRM_Core_DAO::executeQuery($sql);
+
+  }
+
+  public static function correctCity() {
+    $sql = "
+      update
+        civicrm_address
+      set
+        city = upper(city)
+    ";
+    CRM_Core_DAO::executeQuery($sql);
+  }
+
 }

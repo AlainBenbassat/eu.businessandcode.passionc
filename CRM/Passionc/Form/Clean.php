@@ -53,7 +53,7 @@ class CRM_Passionc_Form_Clean extends CRM_Core_Form {
       $txt = CRM_Passionc_Helper::analyze($values['contact_id']);
       CRM_Core_Session::setStatus($txt, '', 'no-popup');
     }
-    else {
+    elseif ($values['import_type'] == 2) {
       // put items in the queue
       $sql = "select Identifiant from tmp_pro_perso where trim(Avancement) = 'OK' order by Identifiant";
       $dao = CRM_Core_DAO::executeQuery($sql);
@@ -74,6 +74,13 @@ class CRM_Passionc_Form_Clean extends CRM_Core_Form {
 
       CRM_Core_Session::setStatus('Terminé', 'Corrections Pro/Perso', 'success');
     }
+    elseif ($values['import_type'] == 3) {
+      CRM_Passionc_Helper::correctName();
+    }
+    elseif ($values['import_type'] == 4) {
+      CRM_Passionc_Helper::correctCity();
+    }
+
 
     parent::postProcess();
   }
