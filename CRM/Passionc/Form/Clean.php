@@ -31,7 +31,7 @@ class CRM_Passionc_Form_Clean extends CRM_Core_Form {
       'Identifiant'
     );
 
-    $this->addRadio('import_type', 'Sélection', [1 => 'Un contact', 2 => 'Tout les contacts'], [], '<br>', TRUE);
+    $this->addRadio('import_type', 'Sélection', [1 => 'Un contact', 2 => 'Tout les contacts', 3 => 'Correction noms', 4 => 'Correction villes'], [], '<br>', TRUE);
     $this->setDefaults(['import_type' => 1]);
 
     $this->addButtons(array(
