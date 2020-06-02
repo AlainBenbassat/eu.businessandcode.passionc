@@ -33,7 +33,7 @@ class CRM_Passionc_Helper {
 
         // create the employer relationship exists
         $msg .= 'Création de la relation employeur';
-        civicrm_create('Contact', 'create', [
+        civicrm_api3('Contact', 'create', [
           'id' => $tempContact->Identifiant,
           'employer_id' => $civiOrg['id'],
         ]);
@@ -62,7 +62,7 @@ class CRM_Passionc_Helper {
   }
 
   public static function getContactFromTemp($id) {
-    $sql = "select * from cereales.tmp_pro_perso where Identifiant = $id";
+    $sql = "select * from tmp_pro_perso where Identifiant = $id";
     $dao = CRM_Core_DAO::executeQuery($sql);
     if ($dao->fetch()) {
       return $dao;
@@ -76,26 +76,36 @@ class CRM_Passionc_Helper {
     $params = [
       'organization_name' => $name,
       'contact_type' => 'Organization',
+      'sequential' => 1,
     ];
-
-    if ($street_address) {
-      $params['street_address'] = $street_address;
-    }
-    if ($postal_code) {
-      $params['postal_code'] = $postal_code;
-    }
-    if ($city) {
-      $params['city'] = $city;
-    }
-
-    $c = civicrm_contact('Contact', 'get', $params);
-
-    if ($c['count'] > 0) {
-      return $c['values'][0];
-    }
-    else {
+    $c = civicrm_api3('Contact', 'get', $params);
+    if ($c['count'] == 0) {
       return FALSE;
     }
+    else {
+      foreach ($c['values'] as $contact) {
+        // get the address
+        $params = [
+          'sequential' => 1,
+        ];
+        if ($street_address) {
+          $params['street_address'] = $street_address;
+        }
+        if ($postal_code) {
+          $params['postal_code'] = $postal_code;
+        }
+        if ($city) {
+          $params['city'] = $city;
+        }
+        $address = civicrm_api3('Address', 'get', $params);
+        if ($address['count'] > 0) {
+          // found contact with that address
+          return $contact;
+        }
+      }
+    }
+
+    return FALSE;
   }
 
   public static function createOrganization($name, $street_address, $supplemental_address_1, $supplemental_address_2, $postal_code, $city, $postal_code_suffix) {
@@ -130,7 +140,7 @@ class CRM_Passionc_Helper {
       $params['postal_code_suffix'] = $postal_code_suffix;
     }
 
-    civicrm_contact('Address', 'create', $params);
+    civicrm_api3('Address', 'create', $params);
 
     return $org;
   }
@@ -200,6 +210,6 @@ class CRM_Passionc_Helper {
     }
 
     // create/update the home address
-    civicrm_create('Address', 'create', $params);
+    civicrm_api3('Address', 'create', $params);
   }
 }
