@@ -1,7 +1,7 @@
 <?php
 
 class CRM_Passionc_Helper {
-  public static function analyze($id) {
+  public static function process_tmp_pro_perso_task(CRM_Queue_TaskContext $ctx, $id) {
     $msg = "Analyse contact id = $id<br>";
 
     try {
@@ -32,27 +32,30 @@ class CRM_Passionc_Helper {
         }
 
         // create the employer relationship exists
-        $msg .= 'Création de la relation employeur';
+        $msg .= 'Création de la relation employeur<br>';
         civicrm_api3('Contact', 'create', [
           'id' => $tempContact->Identifiant,
           'employer_id' => $civiOrg['id'],
         ]);
-
       }
       else {
         $msg .= 'Pas de raison sociale.<br>';
       }
 
       // remove the professional address
-      $msg .= 'Suppression de l\'adresse pro';
+      $msg .= 'Suppression de l\'adresse pro<br>';
       $sql = "delete from civicrm_address where contact_id = " . $tempContact->Identifiant . " and location_type_id  = 3";
       CRM_Core_DAO::executeQuery($sql);
 
       // update home address
       if ($tempContact->Perso_Rue || $tempContact->Perso_Code_Postal) {
-        $msg .= 'Mise à jour adresse perso';
+        $msg .= 'Mise à jour adresse perso<br>';
         self::updateHomeAddress($tempContact->Identifiant, $tempContact->Perso_Rue, $tempContact->Perso_Complément_1, $tempContact->Perso_Complément_2, $tempContact->Perso_Code_Postal, $tempContact->Perso_Ville, $tempContact->Perso_CEDEX);
       }
+
+      // update status
+      $sql = "update tmp_pro_perso set Avancement = 'OK - import' where Identifiant = " . $tempContact->Identifiant;
+      CRM_Core_DAO::executeQuery($sql);
     }
     catch (Exception $e) {
       $msg .= $e->getMessage() . '<br>';

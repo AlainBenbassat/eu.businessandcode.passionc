@@ -8,6 +8,20 @@ use CRM_Passionc_ExtensionUtil as E;
  * @see https://docs.civicrm.org/dev/en/latest/framework/quickform/
  */
 class CRM_Passionc_Form_Clean extends CRM_Core_Form {
+  private $queue;
+  private $queueName = 'passionc';
+
+  public function __construct() {
+    // create the queue
+    $this->queue = CRM_Queue_Service::singleton()->create([
+      'type' => 'Sql',
+      'name' => $this->queueName,
+      'reset' => TRUE, // flush queue upon creation
+    ]);
+
+    parent::__construct();
+  }
+
   public function buildQuickForm() {
 
     // add form elements
@@ -40,7 +54,25 @@ class CRM_Passionc_Form_Clean extends CRM_Core_Form {
       CRM_Core_Session::setStatus($txt, '', 'no-popup');
     }
     else {
-      CRM_Core_Session::setStatus('not implemented', '', 'error');
+      // put items in the queue
+      $sql = "select Identifiant from tmp_pro_perso where trim(Avancement) = 'OK' order by Identifiant";
+      $dao = CRM_Core_DAO::executeQuery($sql);
+      while ($dao->fetch()) {
+        $method = 'process_tmp_pro_perso_task';
+        $task = new CRM_Queue_Task(['CRM_Passionc_Helper', $method], [$dao->Identifiant]);
+        $this->queue->createItem($task);
+      }
+
+      // run the queue
+      $runner = new CRM_Queue_Runner([
+        'title' => 'Conversion pro-perso',
+        'queue' => $this->queue,
+        'errorMode'=> CRM_Queue_Runner::ERROR_CONTINUE,
+        'onEndUrl' => CRM_Utils_System::url('civicrm/nettoyage', 'reset=1'),
+      ]);
+      $runner->runAllViaWeb();
+
+      CRM_Core_Session::setStatus('Terminé', 'Corrections Pro/Perso', 'success');
     }
 
     parent::postProcess();
