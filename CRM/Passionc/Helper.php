@@ -222,7 +222,7 @@ class CRM_Passionc_Helper {
       update
         civicrm_contact
       set
-        first_name = CONCAT(UCASE(LEFT(first_name, 1)), lower(SUBSTRING(first_name, 2)))
+        first_name = CONCAT(upper(LEFT(first_name, 1)), lower(SUBSTRING(first_name, 2)))
       where
         contact_type  = 'Individual'
       and
@@ -236,7 +236,7 @@ class CRM_Passionc_Helper {
       update
         civicrm_contact
       set
-        last_name = CONCAT(UCASE(LEFT(last_name, 1)), lower(SUBSTRING(last_name, 2)))
+        last_name = CONCAT(UCASE(upper(last_name, 1)), lower(SUBSTRING(last_name, 2)))
       where
         contact_type  = 'Individual'
       and
