@@ -222,7 +222,7 @@ class CRM_Passionc_Helper {
       update
         civicrm_contact
       set
-        first_name = CONCAT(upper(LEFT(first_name, 1)), lower(SUBSTRING(first_name, 2)))
+        first_name = CONCAT(upper(LEFT(first_name, 1)), lower(SUBSTRING(first_name, 2)), '####')
       where
         contact_type  = 'Individual'
       and
@@ -236,7 +236,7 @@ class CRM_Passionc_Helper {
       update
         civicrm_contact
       set
-        last_name = CONCAT(upper(LEFT(last_name, 1)), lower(SUBSTRING(last_name, 2)))
+        last_name = CONCAT(upper(LEFT(last_name, 1)), lower(SUBSTRING(last_name, 2)), '####')
       where
         contact_type  = 'Individual'
       and
@@ -246,6 +246,18 @@ class CRM_Passionc_Helper {
     ";
     CRM_Core_DAO::executeQuery($sql);
 
+    $sql = "
+      update
+        civicrm_contact
+      set
+        last_name = replace(last_name, '####', ''),
+        first_name = replace(first_name, '####', '')
+      where
+        contact_type  = 'Individual'
+      and
+        is_deleted = 0
+    ";
+    CRM_Core_DAO::executeQuery($sql);
   }
 
   public static function correctCity() {
